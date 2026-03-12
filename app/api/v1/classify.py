@@ -1,9 +1,8 @@
 from json import JSONDecodeError
-from os.path import join
-
 from fastapi import APIRouter, HTTPException, status
 from google.genai import types
 import json
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.core.config import settings
 from app.core.gemini import client
@@ -14,7 +13,7 @@ from app.prompt.templates import CLASSIFY_SYSTEM_PROMPT
 
 router = APIRouter()
 
-
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(min=2, max=10))
 async def _call_gemini_classify(text: str, labels: list[str]) -> ClassifyResponse:
     l = " label: ".join(labels)
     message = f"text: {text}, List of labels: {l}"

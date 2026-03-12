@@ -15,7 +15,7 @@ AI-powered text analysis API built with FastAPI and Google Gemini.
 - Built with async throughout — safe for high concurrency
 """
 app = FastAPI(
-    title="AI Powered REST API",
+    title="AI Powered REST API for Text Analysis",
     description=description,
     version="1.0.0",
     contact={

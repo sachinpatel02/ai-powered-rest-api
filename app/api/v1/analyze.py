@@ -3,6 +3,7 @@ from json import JSONDecodeError
 from fastapi import APIRouter, HTTPException, status
 from google.genai import types
 import json
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.core.config import settings
 from app.core.gemini import client
@@ -10,9 +11,10 @@ from app.schemas.requests import AnalyzeRequest
 from app.schemas.responses import AnalyzeResponse
 from app.prompt.templates import ANALYZE_SYSTEM_PROMPT
 
+
 router = APIRouter()
 
-
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(min=2, max=10))
 async def _call_gemini_analyze(text: str) -> AnalyzeResponse:
     response = await client.aio.models.generate_content(
         model=settings.gemini_model,
