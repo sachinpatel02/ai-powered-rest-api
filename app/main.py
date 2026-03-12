@@ -8,7 +8,7 @@ app = FastAPI(
 )
 
 app.include_router(analyze.router, prefix="/api/v1", tags=["analyze"])
-#app.include_router(classify.router, prefix="/api/v1")
+app.include_router(classify.router, prefix="/api/v1", tags=["classify"])
 app.include_router(extract.router, prefix="/api/v1", tags=["extract"])
 app.include_router(qa.router, prefix="/api/v1", tags=["qa"])
 
