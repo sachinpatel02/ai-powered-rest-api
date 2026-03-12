@@ -14,6 +14,7 @@ from app.prompt.templates import CLASSIFY_SYSTEM_PROMPT
 
 router = APIRouter()
 
+
 async def _call_gemini_classify(text: str, labels: list[str]) -> ClassifyResponse:
     l = " label: ".join(labels)
     message = f"text: {text}, List of labels: {l}"
@@ -31,8 +32,27 @@ async def _call_gemini_classify(text: str, labels: list[str]) -> ClassifyRespons
     data = json.loads(response.text)
     return ClassifyResponse(**data)
 
-@router.post("/classify", response_model=ClassifyResponse)
+
+@router.post("/classify", response_model=ClassifyResponse,
+             summary="Classify text into custom labels",
+             response_description="The most appropriate label with confidence and reasoning"
+             )
 async def classify(request: ClassifyRequest):
+    """
+        Classify text into one of the caller-provided labels.
+
+        Unlike hardcoded classifiers, this endpoint accepts any labels
+        at runtime — making it reusable across completely different
+        classification domains without any code changes.
+
+        Returns:
+        - **label** — the winning label from your provided list
+        - **confidence_score** — 0.0 to 1.0
+        - **reasoning** — one sentence chain-of-thought explanation
+
+        Example use cases: support ticket routing, content categorization,
+        intent detection, document tagging.
+        """
     try:
         return await _call_gemini_classify(request.text, request.labels)
     except JSONDecodeError:

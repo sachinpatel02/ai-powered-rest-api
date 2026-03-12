@@ -28,8 +28,25 @@ async def _call_gemini_analyze(text: str) -> AnalyzeResponse:
     data = json.loads(response.text)
     return AnalyzeResponse(**data)
 
-@router.post("/analyze", response_model=AnalyzeResponse)
+
+@router.post("/analyze", response_model=AnalyzeResponse,
+             summary="Analyze text",
+             response_description="Structured analysis of the provided text"
+             )
 async def analyze_text(request: AnalyzeRequest):
+    """
+        Analyze a piece of text and return structured insights.
+
+        Performs the following analysis:
+        - **Sentiment** — positive, negative, or neutral
+        - **Tone** — descriptive tone label (formal, casual, urgent, etc.)
+        - **Summary** — concise 1-2 sentence summary
+        - **Readability** — simple, moderate, or complex
+        - **Key Topics** — up to 5 main topics identified
+
+        Ideal for content moderation, customer feedback analysis, and
+        automated content tagging pipelines.
+        """
     try:
         return await _call_gemini_analyze(request.text)
     except JSONDecodeError:

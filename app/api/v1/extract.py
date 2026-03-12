@@ -29,8 +29,26 @@ async def _call_gemini_extract(text: str) -> ExtractResponse:
     return ExtractResponse(**data)
 
 
-@router.post("/extract", response_model=ExtractResponse)
+@router.post("/extract", response_model=ExtractResponse,
+             summary="Extract named entities",
+             response_description="All named entities found in the text"
+             )
 async def extract_text(request: ExtractRequest):
+    """
+        Extract all named entities from the provided text.
+
+        Identifies and classifies the following entity types:
+        - **PERSON** — people and public figures
+        - **ORGANIZATION** — companies, institutions, agencies
+        - **LOCATION** — cities, countries, landmarks
+        - **DATE** — dates, times, periods
+        - **PRODUCT** — products, software, services
+        - **EVENT** — named events, conferences, incidents
+        - **OTHER** — any other notable named entity
+
+        Useful for knowledge extraction, document indexing, and
+        automated metadata generation.
+        """
     try:
         return await _call_gemini_extract(request.text)
     except JSONDecodeError:

@@ -30,8 +30,23 @@ async def _call_gemini_qa(context: str, question: str) -> QAResponse:
     return QAResponse(**data)
 
 
-@router.post("/qa", response_model=QAResponse)
+@router.post("/qa", response_model=QAResponse,
+             summary="Answer a question from context",
+             response_description="Answer grounded in the provided context"
+             )
 async def qa(request: QARequest):
+    """
+        Answer a question strictly based on the provided context.
+
+        Key behaviors:
+        - Answers are grounded in the context — model will not fabricate
+        - `found_in_context` flag tells you if the answer came from context
+          or the model's general knowledge
+        - `confidence` reflects how clearly the answer appears in the text
+
+        Ideal for document Q&A, support ticket resolution, and
+        contract/policy question answering systems.
+        """
     try:
         return await _call_gemini_qa(request.context, request.question)
     except JSONDecodeError:
