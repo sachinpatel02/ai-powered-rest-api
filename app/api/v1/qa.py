@@ -1,0 +1,40 @@
+from json import JSONDecodeError
+from fastapi import APIRouter, HTTPException, status
+from google.genai import types
+import json
+
+from app.core.config import settings
+from app.core.gemini import client
+
+from app.schemas.requests import QARequest
+from app.schemas.responses import QAResponse
+from app.prompt.templates import QA_SYSTEM_PROMPT
+
+router = APIRouter()
+
+
+async def _call_gemini_qa(context: str, question: str) -> QAResponse:
+    message = f"context: {context}, question: {question}"
+    response = await client.aio.models.generate_content(
+        model=settings.gemini_model,
+        contents=message,
+        config=types.GenerateContentConfig(
+            system_instruction=QA_SYSTEM_PROMPT,
+            temperature=settings.temperature,
+            max_output_tokens=settings.max_output_tokens,
+            response_mime_type="application/json",
+            response_schema=QAResponse,
+        )
+    )
+    data = json.loads(response.text)
+    return QAResponse(**data)
+
+
+@router.post("/qa", response_model=QAResponse)
+async def qa(request: QARequest):
+    try:
+        return await _call_gemini_qa(request.context, request.question)
+    except JSONDecodeError:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Model returned invalid JSON")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
