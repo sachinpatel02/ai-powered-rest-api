@@ -1,4 +1,4 @@
-# AI Powered REST API for Text Analysis
+# Text Intelligence API -- Multi-endpoint NLP Service
 
 An async REST API for AI-powered text analysis built with **FastAPI** and **Google Gemini**.
 Provides structured NLP capabilities via clean, documented endpoints — production-ready
